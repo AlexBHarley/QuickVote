@@ -15,24 +15,43 @@
             android:layout_height="wrap_content"
             android:id="@+id/poll_name"
             android:layout_marginTop="10dp"
-            android:hint="Poll name" />
+            android:maxLines="1"
+            android:hint="Name" />
+
+        <EditText
+            android:layout_width="285dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/poll_duration"
+            android:layout_marginTop="10dp"
+            android:inputType="numberDecimal"
+            android:maxLines="1"
+            android:hint="Duration" />
 
         <CheckBox
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Users can add their own options"
             android:id="@+id/checkBox" />
 
         <android.support.v7.widget.RecyclerView
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+
             android:id="@+id/poll_options">
 
         </android.support.v7.widget.RecyclerView>
 
+        <Button
+            android:id="@+id/create_poll_button"
+            style="?android:textAppearanceSmall"
+            android:layout_width="242dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/action_create_poll"
+            android:textStyle="bold"
+            android:layout_weight="0.1"/>
 
     </LinearLayout>
-
-
 
 </LinearLayout>
