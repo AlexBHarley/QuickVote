@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -21,12 +22,16 @@ import android.widget.Toast;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import io.deepstream.DeepstreamClient;
 import io.deepstream.DeepstreamLoginException;
+import io.deepstream.DeepstreamRuntimeErrorHandler;
 import io.deepstream.List;
 import io.deepstream.LoginResult;
 import io.deepstream.Record;
+import io.deepstream.constants.Event;
+import io.deepstream.constants.Topic;
 
 
 public class CreatePollActivity extends AppCompatActivity {
@@ -37,6 +42,7 @@ public class CreatePollActivity extends AppCompatActivity {
 
     private EditText mPollNameField;
     private EditText mPollDurationField;
+    private EditText mNewPollNameField;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +52,18 @@ public class CreatePollActivity extends AppCompatActivity {
 
         mPollNameField = (EditText) findViewById(R.id.poll_name);
         mPollDurationField = (EditText) findViewById(R.id.poll_duration);
+        mNewPollNameField = (EditText) findViewById(R.id.new_poll_option_name);
+        mNewPollNameField.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    tryAddPollOption();
+                    return true;
+                }
+                return false;
+            }
+        });
         Button mCreatePollButton = (Button) findViewById(R.id.create_poll_button);
         mCreatePollButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +71,16 @@ public class CreatePollActivity extends AppCompatActivity {
                 attemptCreatePoll();
             }
         });
+    }
+
+    private void tryAddPollOption() {
+        if(mPollAdapter.getOptions().size() >= 10) {
+            Toast.makeText(CreatePollActivity.this, "Too many poll options, please remove one", Toast.LENGTH_LONG).show();
+            //todo: implement removing
+            return;
+        }
+        mPollAdapter.addOption(mNewPollNameField.getText().toString());
+        mNewPollNameField.setText("");
     }
 
     public void notifyChanges() {
@@ -124,6 +152,13 @@ public class CreatePollActivity extends AppCompatActivity {
 
             DeepstreamClient client = DeepstreamService.getInstance().getDeepstreamClient();
 
+            client.setRuntimeErrorHandler(new DeepstreamRuntimeErrorHandler() {
+                @Override
+                public void onException(Topic topic, Event event, String s) {
+
+                }
+            });
+
             try {
                 loginResult = client.login(new JsonObject());
             } catch (DeepstreamLoginException e) {
@@ -136,10 +171,12 @@ public class CreatePollActivity extends AppCompatActivity {
                 return false;
             }
 
-            //Record pollRecord = client.record.getRecord("poll/" + this.mPollName);
+            Record pollRecord = client.record.getRecord("poll/" + mPollName);
+            PollObject po = new PollObject(mPollName, mPollName + "-options/");
+            pollRecord.set(po);
             //create record for each poll option
             for (PollOption p : this.mPollOptions) {
-                Record r = client.record.getRecord("pollOption/" + p.name);
+                Record r = client.record.getRecord(po.optionListName + p.name);
                 r.set(p);
             }
 
@@ -148,10 +185,8 @@ public class CreatePollActivity extends AppCompatActivity {
             for (PollOption p : mPollOptions) {
                 pollNames.add(p.name);
             }
-            List pollOptionList = client.record.getList(this.mPollName);
+            List pollOptionList = client.record.getList(po.optionListName);
             pollOptionList.setEntries(pollNames);
-
-
 
             return true;
         }
@@ -163,7 +198,7 @@ public class CreatePollActivity extends AppCompatActivity {
             }
             Log.d("CreatePollTask", "starting new activity");
             Intent i = new Intent(CreatePollActivity.this, RunningPollActivity.class);
-            i.putExtra("pollName", mPollName);
+            i.putExtra("pollName", "poll/" + mPollName);
             startActivity(i);
         }
     }

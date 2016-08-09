@@ -36,11 +36,14 @@
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="5"
-
             android:id="@+id/poll_options">
-
         </android.support.v7.widget.RecyclerView>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Add an option"
+            android:id="@+id/new_poll_option_name" />
 
         <Button
             android:id="@+id/create_poll_button"
@@ -49,8 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/action_create_poll"
-            android:textStyle="bold"
-            android:layout_weight="0.1"/>
+            android:textStyle="bold" />
 
     </LinearLayout>
 
