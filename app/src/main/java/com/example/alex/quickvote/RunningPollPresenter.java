@@ -20,7 +20,6 @@ public class RunningPollPresenter {
     private RunningPollActivity context;
 
     public RunningPollPresenter() {
-        service = DeepstreamService.getInstance();
     }
 
     public void takeView(RunningPollActivity context) {
