@@ -8,18 +8,24 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-/**
- * Created by Alex on 10/08/2016.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class SimpleAdapter extends ArrayAdapter<PollOption> {
 
     private final Context context;
-    private final PollOption[] values;
+    private final List<PollOption> values;
 
-    public SimpleAdapter(Context context, PollOption[] objects) {
-        super(context, -1, objects);
+    public SimpleAdapter(Context context) {
+        super(context, -1, new PollOption[]{});
         this.context = context;
-        this.values = objects;
+        this.values = new ArrayList<>();
+    }
+
+    @Override
+    public int getCount() {
+        return values.size();
     }
 
     @Override
@@ -29,9 +35,13 @@ public class SimpleAdapter extends ArrayAdapter<PollOption> {
         View rowView = inflater.inflate(R.layout.running_poll_option, parent, false);
         TextView optionName = (TextView) rowView.findViewById(R.id.poll_option_name);
         TextView optionVotes = (TextView) rowView.findViewById(R.id.poll_option_votes);
-        optionName.setText(values[position].name);
-        optionVotes.setText(Integer.toString(values[position].votes));
+        optionName.setText(values.get(position).name);
+        optionVotes.setText(Integer.toString(values.get(position).votes));
 
         return rowView;
+    }
+
+    public void add(ArrayList<PollOption> pollOptions) {
+        this.values.addAll(pollOptions);
     }
 }

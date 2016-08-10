@@ -30,6 +30,7 @@ import io.deepstream.DeepstreamRuntimeErrorHandler;
 import io.deepstream.List;
 import io.deepstream.LoginResult;
 import io.deepstream.Record;
+import io.deepstream.RecordEventsListener;
 import io.deepstream.constants.Event;
 import io.deepstream.constants.Topic;
 
@@ -48,7 +49,14 @@ public class CreatePollActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_poll);
-        setUpRecyclerView();
+
+        ArrayList<PollOption> options = new ArrayList<>();
+        options.add(new PollOption("chicken"));
+        options.add(new PollOption("beef"));
+        options.add(new PollOption("pork"));
+
+        new CreatePollTask("dinner", 30, options).execute();
+        /*setUpRecyclerView();
 
         mPollNameField = (EditText) findViewById(R.id.poll_name);
         mPollDurationField = (EditText) findViewById(R.id.poll_duration);
@@ -70,7 +78,7 @@ public class CreatePollActivity extends AppCompatActivity {
             public void onClick(View v) {
                 attemptCreatePoll();
             }
-        });
+        });*/
     }
 
     private void tryAddPollOption() {
@@ -102,7 +110,6 @@ public class CreatePollActivity extends AppCompatActivity {
     }
 
     private void attemptCreatePoll() {
-        Log.d("CreatePollActivity", "attemptCreatePoll");
         String pollName = mPollNameField.getText().toString();
         String pollDuration = mPollDurationField.getText().toString();
 
@@ -139,7 +146,6 @@ public class CreatePollActivity extends AppCompatActivity {
         private final ArrayList<PollOption> mPollOptions;
 
         CreatePollTask(String pollName, int pollDuration, ArrayList<PollOption> pollOptions) {
-            Log.d("CreatePollTask", "constructor");
             this.mPollName = pollName;
             this.mPollDuration = pollDuration;
             this.mPollOptions = pollOptions;
@@ -148,7 +154,6 @@ public class CreatePollActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             LoginResult loginResult;
-            Log.d("CreatePollTask", "doInBackground");
 
             DeepstreamClient client = DeepstreamService.getInstance().getDeepstreamClient();
 
@@ -172,21 +177,18 @@ public class CreatePollActivity extends AppCompatActivity {
             }
 
             Record pollRecord = client.record.getRecord("poll/" + mPollName);
-            PollObject po = new PollObject(mPollName, mPollName + "-options/");
-            pollRecord.set(po);
+            Log.d("Create", "poll/" + mPollName);
+            PollObject po = new PollObject(mPollName, new ArrayList<String>());
+
             //create record for each poll option
             for (PollOption p : this.mPollOptions) {
-                Record r = client.record.getRecord(po.optionListName + p.name);
+                String optionName = "option/" + UUID.randomUUID().toString().substring(0,8);
+                po.options.add(optionName);
+                Log.d("Create", optionName);
+                Record r = client.record.getRecord(optionName);
                 r.set(p);
             }
-
-            //create list of option names
-            ArrayList<String> pollNames = new ArrayList<>();
-            for (PollOption p : mPollOptions) {
-                pollNames.add(p.name);
-            }
-            List pollOptionList = client.record.getList(po.optionListName);
-            pollOptionList.setEntries(pollNames);
+            pollRecord.set(po);
 
             return true;
         }

@@ -1,13 +1,15 @@
 package com.example.alex.quickvote;
 
 
+import java.util.ArrayList;
+
 public class PollObject {
 
     String name;
-    String optionListName;
+    ArrayList<String> options;
 
-    public PollObject(String name, String optionListName) {
+    public PollObject(String name, ArrayList<String> optionNames) {
         this.name = name;
-        this.optionListName = optionListName;
+        this.options = optionNames;
     }
 }
