@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -34,9 +35,11 @@ public class SimpleAdapter extends ArrayAdapter<PollOption> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.running_poll_option, parent, false);
         TextView optionName = (TextView) rowView.findViewById(R.id.poll_option_name);
-        TextView optionVotes = (TextView) rowView.findViewById(R.id.poll_option_votes);
+        ProgressBar progressBar = (ProgressBar) rowView.findViewById(R.id.running_poll_option_progress);
+        //TextView optionVotes = (TextView) rowView.findViewById(R.id.poll_option_votes);
+        progressBar.setProgress(values.get(position).votes);
         optionName.setText(values.get(position).name);
-        optionVotes.setText(Integer.toString(values.get(position).votes));
+        //optionVotes.setText(Integer.toString(values.get(position).votes));
 
         return rowView;
     }

@@ -50,13 +50,16 @@ public class CreatePollActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_poll);
 
-        ArrayList<PollOption> options = new ArrayList<>();
-        options.add(new PollOption("chicken"));
-        options.add(new PollOption("beef"));
-        options.add(new PollOption("pork"));
+        /*ArrayList<PollOption> options = new ArrayList<>();
+        options.add(new PollOption("Nachos"));
+        options.add(new PollOption("Pizza"));
+        options.add(new PollOption("Pasta"));
+        options.add(new PollOption("Roast"));
+        options.add(new PollOption("Lasagne"));
 
-        new CreatePollTask("dinner", 30, options).execute();
-        /*setUpRecyclerView();
+        new CreatePollTask("What's for dinner?", 30, options).execute();*/
+
+        setUpRecyclerView();
 
         mPollNameField = (EditText) findViewById(R.id.poll_name);
         mPollDurationField = (EditText) findViewById(R.id.poll_duration);
@@ -78,7 +81,7 @@ public class CreatePollActivity extends AppCompatActivity {
             public void onClick(View v) {
                 attemptCreatePoll();
             }
-        });*/
+        });
     }
 
     private void tryAddPollOption() {
@@ -200,7 +203,7 @@ public class CreatePollActivity extends AppCompatActivity {
             }
             Log.d("CreatePollTask", "starting new activity");
             Intent i = new Intent(CreatePollActivity.this, RunningPollActivity.class);
-            i.putExtra("pollName", "poll/" + mPollName);
+            i.putExtra("pollName", mPollName);
             startActivity(i);
         }
     }

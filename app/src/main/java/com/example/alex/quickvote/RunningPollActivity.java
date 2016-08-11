@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -21,8 +22,9 @@ import io.deepstream.RecordChangedCallback;
 public class RunningPollActivity extends AppCompatActivity {
 
     ListView mListView;
-    String mPollName;
+    String pollName;
     SimpleAdapter mAdapter;
+    TextView mPollName;
     ArrayList<PollOption> currentPollOptions;
 
     @Override
@@ -31,22 +33,25 @@ public class RunningPollActivity extends AppCompatActivity {
         setContentView(R.layout.activity_running_poll);
 
         Intent i = getIntent();
-        mPollName = i.getStringExtra("pollName");
+        pollName = i.getStringExtra("pollName");
+        mPollName = (TextView) findViewById(R.id.running_poll_name);
+        mPollName.setText(pollName);
         mListView = (ListView) findViewById(R.id.poll_options);
         currentPollOptions = new ArrayList<>();
         mAdapter = new SimpleAdapter(this, currentPollOptions);
         mListView.setAdapter(mAdapter);
 
         populateList();
+
+        //updateList("pork", 5);
     }
 
     private void populateList() {
-        DeepstreamClient client = DeepstreamService.getInstance().getDeepstreamClient();
-        Record r = client.record.getRecord(mPollName);
+        final DeepstreamClient client = DeepstreamService.getInstance().getDeepstreamClient();
+        Record r = client.record.getRecord("poll/" + pollName);
 
-        JsonArray options = r.get("options").getAsJsonArray();
+        final JsonArray options = r.get("options").getAsJsonArray();
 
-        ArrayList<PollOption> pollOptions = new ArrayList<>();
         for (JsonElement option : options) {
             Record optionRec = client.record.getRecord(option.getAsString());
 
@@ -74,6 +79,64 @@ public class RunningPollActivity extends AppCompatActivity {
             currentPollOptions.add(new PollOption(recName, recVotes));
         }
         mAdapter.notifyDataSetChanged();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Record re1 = client.record.getRecord(options.get(0).getAsString());
+                Record re2 = client.record.getRecord(options.get(1).getAsString());
+                Record re3 = client.record.getRecord(options.get(2).getAsString());
+                Record re4 = client.record.getRecord(options.get(3).getAsString());
+                Record re5 = client.record.getRecord(options.get(4).getAsString());
+
+                re1.set("votes", 1);
+                re2.set("votes", 1);
+                re3.set("votes", 1);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                re1.set("votes", 2);
+                re2.set("votes", 1);
+                re3.set("votes", 2);
+                re4.set("votes", 1);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                re1.set("votes", 3);
+                re4.set("votes", 2);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                re1.set("votes", 4);
+                re2.set("votes", 2);
+                re4.set("votes", 2);
+                re5.set("votes", 1);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void updateList(String optionName, int number) {
