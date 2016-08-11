@@ -15,12 +15,12 @@ import java.util.List;
 public class SimpleAdapter extends ArrayAdapter<PollOption> {
 
     private final Context context;
-    private final List<PollOption> values;
+    private ArrayList<PollOption> values;
 
-    public SimpleAdapter(Context context) {
+    public SimpleAdapter(Context context, ArrayList<PollOption> values) {
         super(context, -1, new PollOption[]{});
         this.context = context;
-        this.values = new ArrayList<>();
+        this.values = values;
     }
 
     @Override
@@ -39,9 +39,5 @@ public class SimpleAdapter extends ArrayAdapter<PollOption> {
         optionVotes.setText(Integer.toString(values.get(position).votes));
 
         return rowView;
-    }
-
-    public void add(ArrayList<PollOption> pollOptions) {
-        this.values.addAll(pollOptions);
     }
 }

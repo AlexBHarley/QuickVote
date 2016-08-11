@@ -9,11 +9,11 @@ import android.widget.ListView;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 import java.util.ArrayList;
 
 import io.deepstream.DeepstreamClient;
-import io.deepstream.List;
 import io.deepstream.Record;
 import io.deepstream.RecordChangedCallback;
 
@@ -23,6 +23,7 @@ public class RunningPollActivity extends AppCompatActivity {
     ListView mListView;
     String mPollName;
     SimpleAdapter mAdapter;
+    ArrayList<PollOption> currentPollOptions;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,9 +32,9 @@ public class RunningPollActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         mPollName = i.getStringExtra("pollName");
-
         mListView = (ListView) findViewById(R.id.poll_options);
-        mAdapter = new SimpleAdapter(this);
+        currentPollOptions = new ArrayList<>();
+        mAdapter = new SimpleAdapter(this, currentPollOptions);
         mListView.setAdapter(mAdapter);
 
         populateList();
@@ -45,11 +46,13 @@ public class RunningPollActivity extends AppCompatActivity {
 
         JsonArray options = r.get("options").getAsJsonArray();
 
-        Log.d("DS", "Getting options");
-
         ArrayList<PollOption> pollOptions = new ArrayList<>();
         for (JsonElement option : options) {
             Record optionRec = client.record.getRecord(option.getAsString());
+
+            final String recName = (optionRec.get("name")).getAsString();
+            int recVotes = optionRec.get("votes").getAsInt();
+
             optionRec.subscribe("votes", new RecordChangedCallback() {
                 @Override
                 public void onRecordChanged(String s, JsonElement jsonElement) {
@@ -59,17 +62,26 @@ public class RunningPollActivity extends AppCompatActivity {
                 @Override
                 public void onRecordChanged(String s, String s1, Object o) {
                     Log.d("RECORD CHANGE: " + s, "Path: " + s1 + " data " + o.toString());
+                    updateList(recName, ((JsonPrimitive) o).getAsInt());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
             });
-            String recName = optionRec.get("name").getAsString();
-            Log.d("Name", recName);
-            int recVotes = optionRec.get("votes").getAsInt();
-            Log.d("Votes", String.valueOf(recVotes));
-            pollOptions.add(new PollOption(recName, recVotes));
+            currentPollOptions.add(new PollOption(recName, recVotes));
         }
-
-        mAdapter.add(pollOptions);
-        Log.d("Count", String.valueOf(mAdapter.getCount()));
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void updateList(String optionName, int number) {
+        for (PollOption p : currentPollOptions) {
+            if(p.name.equals(optionName)) {
+                p.votes = number;
+                break;
+            }
+        }
     }
 }

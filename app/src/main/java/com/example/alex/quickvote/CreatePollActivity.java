@@ -83,7 +83,7 @@ public class CreatePollActivity extends AppCompatActivity {
 
     private void tryAddPollOption() {
         if(mPollAdapter.getOptions().size() >= 10) {
-            Toast.makeText(CreatePollActivity.this, "Too many poll options, please remove one", Toast.LENGTH_LONG).show();
+            Toast.makeText(CreatePollActivity.this, "Too many poll currentPollOptions, please remove one", Toast.LENGTH_LONG).show();
             //todo: implement removing
             return;
         }
